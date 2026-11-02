@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Een speciale boodschap voor jou!</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: radial-gradient(circle, #1a1a3a 0%, #0a0a16 100%);
+      color: #ffffff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .card-container {
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(255, 215, 0, 0.3);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      max-width: 450px;
+      width: 100%;
+      padding: 25px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      text-align: center;
+    }
+    h1 {
+      font-size: 1.5rem;
+      color: #ffd700;
+      margin-bottom: 15px;
+      font-weight: 600;
+    }
+    .media-box {
+      position: relative;
+      width: 100%;
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 20px;
+      border: 2px solid #ffd700;
+      background-color: #000;
+    }
+    .media-box video, .media-box img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    .video-wrapper {
+      position: relative;
+      width: 100%;
+    }
+    .play-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.4);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    .play-overlay:hover {
+      background: rgba(0, 0, 0, 0.2);
+    }
+    .play-button {
+      width: 70px;
+      height: 70px;
+      background: #ffd700;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+      transition: transform 0.2s ease;
+    }
+    .play-overlay:hover .play-button {
+      transform: scale(1.1);
+    }
+    .play-icon {
+      width: 0;
+      height: 0;
+      border-top: 14px solid transparent;
+      border-bottom: 14px solid transparent;
+      border-left: 24px solid #1a1a3a;
+      margin-left: 4px;
+    }
+    .message-box {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 18px;
+      border-radius: 10px;
+      border-left: 4px solid #ffd700;
+      font-size: 1.05rem;
+      line-height: 1.6;
+      color: #e0e0e0;
+      margin-bottom: 20px;
+      white-space: pre-line;
+      text-align: left;
+    }
+    .sender {
+      font-weight: bold;
+      color: #ffd700;
+      margin-top: 10px;
+      display: block;
+      text-align: right;
+    }
+    .footer {
+      font-size: 0.8rem;
+      color: #8888aa;
+      margin-top: 15px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card-container">
+    <h1>✨ Een speciale boodschap voor jou! ✨</h1>
+
+    <div class="media-box">
+      
+            <div class="video-wrapper">
+              <video id="cardVideo" playsinline preload="metadata" loop>
+                <source src="media.mp4" type="video/mp4">
+                Je browser ondersteunt deze video niet.
+              </video>
+              <div class="play-overlay" id="playOverlay" onclick="playVideo()">
+                <div class="play-button">
+                  <div class="play-icon"></div>
+                </div>
+              </div>
+            </div>
+            
+    </div>
+
+    <div class="message-box">
+      Gefeliciteerd met je verjaardag! 🥳
+
+Hopelijk heb je een geweldige dag vol verrassingen en plezier!
+      <span class="sender">— </span>
+    </div>
+
+    <div class="footer">
+      Afgespeeld via jouw Lenticulaire NFC Kaart
+    </div>
+  </div>
+
+  <script>
+    function playVideo() {
+      const video = document.getElementById('cardVideo');
+      const overlay = document.getElementById('playOverlay');
+      if (video) {
+        video.play().then(() => {
+          video.controls = true;
+          if (overlay) {
+            overlay.style.display = 'none';
+          }
+        }).catch(error => {
+          console.log("Afspelen mislukt:", error);
+        });
+      }
+    }
+
+    // Extra fallback zodat de loop altijd werkt via JavaScript
+    document.addEventListener("DOMContentLoaded", function() {
+      const video = document.getElementById('cardVideo');
+      if (video) {
+        video.addEventListener('ended', function() {
+          video.currentTime = 0;
+          video.play();
+        });
+      }
+    });
+  </script>
+
+</body>
+</html>
