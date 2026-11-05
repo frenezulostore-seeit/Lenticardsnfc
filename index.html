@@ -1,11 +1,17 @@
-<!DOCTYPE html>
+import os
+import shutil
+import tkinter as tk
+from tkinter import filedialog, messagebox
+
+def generate_html(video_filename):
+    return f"""<!DOCTYPE html>
 <html lang="nl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Persoonlijke Video</title>
     <style>
-        body, html {
+        body, html {{
             margin: 0;
             padding: 0;
             width: 100%;
@@ -15,23 +21,23 @@
             display: flex;
             justify-content: center;
             align-items: center;
-        }
-        .video-container {
+        }}
+        .video-container {{
             position: relative;
             width: 100%;
             height: 100%;
             display: flex;
             justify-content: center;
             align-items: center;
-        }
-        video {
+        }}
+        video {{
             width: 100%;
             height: 100%;
             object-fit: contain;
             background-color: #000;
-        }
+        }}
         /* Het kruisje linksboven */
-        .close-btn {
+        .close-btn {{
             position: absolute;
             top: 20px;
             left: 20px;
@@ -52,10 +58,52 @@
             line-height: 1;
             backdrop-filter: blur(4px);
             -webkit-backdrop-filter: blur(4px);
-        }
-        .close-btn:active {
+        }}
+        .close-btn:active {{
             background-color: rgba(255, 255, 255, 0.3);
-        }
+        }}
+        /* Centrale afspeelknop */
+        .play-overlay {{
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            z-index: 900;
+            transition: opacity 0.3s ease;
+        }}
+        .play-button {{
+            width: 80px;
+            height: 80px;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            transition: transform 0.2s ease;
+        }}
+        .play-overlay:hover .play-button {{
+            transform: scale(1.1);
+        }}
+        /* Driehoekje voor de play-knop */
+        .play-triangle {{
+            width: 0;
+            height: 0;
+            border-top: 18px solid transparent;
+            border-bottom: 18px solid transparent;
+            border-left: 30px solid #000000;
+            margin-left: 6px;
+        }}
+        .hidden {{
+            opacity: 0;
+            pointer-events: none;
+        }}
     </style>
 </head>
 <body>
@@ -64,23 +112,94 @@
         <!-- Sluitknop / kruisje -->
         <a href="#" class="close-btn" onclick="closePage(event)" aria-label="Sluiten">&times;</a>
         
-        <!-- Video element met controls zodat de gebruiker op play drukt -->
-        <video id="nfcVideo" controls playsinline preload="auto">
-            <source src="Verjjaardag.mp4" type="video/mp4">
+        <!-- Aangepaste Play Overlay -->
+        <div id="playOverlay" class="play-overlay" onclick="playVideo()">
+            <div class="play-button">
+                <div class="play-triangle"></div>
+            </div>
+        </div>
+
+        <!-- Video element zonder standaard controls -->
+        <video id="nfcVideo" playsinline preload="auto" onended="showOverlay()">
+            <source src="{video_filename}" type="video/mp4">
             Je browser ondersteunt geen video-element.
         </video>
     </div>
 
     <script>
-        function closePage(e) {
+        const video = document.getElementById('nfcVideo');
+        const overlay = document.getElementById('playOverlay');
+
+        function playVideo() {{
+            video.play();
+            overlay.classList.add('hidden');
+        }}
+
+        function showOverlay() {{
+            overlay.classList.remove('hidden');
+        }}
+
+        // Als de gebruiker toch op de video tikt/klikt
+        video.addEventListener('click', function() {{
+            if (video.paused) {{
+                playVideo();
+            }} else {{
+                video.pause();
+                showOverlay();
+            }}
+        }});
+
+        function closePage(e) {{
             e.preventDefault();
-            if (window.history.length > 1) {
+            if (window.history.length > 1) {{
                 window.history.back();
-            } else {
+            }} else {{
                 window.close();
-            }
-        }
+            }}
+        }}
     </script>
 
 </body>
 </html>
+"""
+
+def select_and_generate():
+    video_path = filedialog.askopenfilename(
+        title="Selecteer een videobestand",
+        filetypes=[("MP4 video's", "*.mp4"), ("Alle bestanden", "*.*")]
+    )
+    
+    if not video_path:
+        return
+
+    target_dir = filedialog.askdirectory(title="Selecteer uitvoermap (je GitHub repo map)")
+    
+    if not target_dir:
+        return
+
+    video_filename = os.path.basename(video_path)
+    destination_video_path = os.path.join(target_dir, video_filename)
+
+    if os.path.abspath(video_path) != os.path.abspath(destination_video_path):
+        shutil.copy(video_path, destination_video_path)
+
+    html_code = generate_html(video_filename)
+    index_path = os.path.join(target_dir, "index.html")
+    
+    with open(index_path, "w", encoding="utf-8") as f:
+        f.write(html_code)
+
+    messagebox.showinfo("Succes", f"Bestanden succesvol opgeslagen in:\n{target_dir}\n\n- {video_filename}\n- index.html")
+
+root = tk.Tk()
+root.title("NFC Video HTML Generator")
+root.geometry("400x180")
+root.resizable(False, False)
+
+label = tk.Label(root, text="Selecteer een video om de HTML voor te genereren:", font=("Arial", 11), wraplength=350, pady=20)
+label.pack()
+
+btn = tk.Button(root, text="Selecteer Video & Genereer", command=select_and_generate, bg="#28a745", fg="white", font=("Arial", 11, "bold"), padx=10, pady=5)
+btn.pack(pady=10)
+
+root.mainloop()
